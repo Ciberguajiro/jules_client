@@ -52,12 +52,14 @@
         ? activitiesData
         : activitiesData.activities || [];
 
-        activities = activities.map( a => {
-          if (a.planApproved) {
-            a.planApproved.plan = activities.find(d => d.planGenerated?.plan.id === a.planApproved?.planId)?.planGenerated?.plan
-          }
-          return a
-        })
+      activities = activities.map((a) => {
+        if (a.planApproved) {
+          a.planApproved.plan = activities.find(
+            (d) => d.planGenerated?.plan.id === a.planApproved?.planId,
+          )?.planGenerated?.plan;
+        }
+        return a;
+      });
 
       isPlanApproved = ![
         "AWAITING_PLAN_APPROVAL",
@@ -115,7 +117,7 @@
 
   $effect(() => {
     const hasInProgressSession = session?.state === "IN_PROGRESS";
-    
+
     if (hasInProgressSession) {
       if (!refetchTimer) {
         countdown = 1.5;
@@ -137,20 +139,27 @@
   });
 </script>
 
-<div class="flex flex-col h-full bg-background overflow-hidden">
-  {#if loading || !session}
-    <div class="flex-1 flex flex-col items-center justify-center space-y-4">
+<div class="flex flex-col h-full bg-background relative overflow-hidden">
+  {#if loading }
+    <div class="absolute bg-primary/60 backdrop-blur-2xl transition-all ease-in-out top-20 z-20 w-75 h-45 right-10 rounded-xl flex-1 flex flex-col items-center justify-center space-y-4">
       <div class="relative">
         <Loader2 class="h-12 w-12 animate-spin text-primary" />
-        <div class="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse"></div>
+        <div
+          class="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse"
+        ></div>
       </div>
       <p class="text-muted-foreground font-medium animate-pulse">
         Loading session details...
       </p>
     </div>
-  {:else if error}
-    <div class="flex-1 flex flex-col items-center justify-center p-6 text-center">
-      <div class="bg-destructive/10 p-4 rounded-2xl mb-6 ring-1 ring-destructive/20 shadow-lg shadow-destructive/5">
+  {/if}
+  {#if error}
+    <div
+      class="flex-1 flex flex-col items-center justify-center p-6 text-center"
+    >
+      <div
+        class="bg-destructive/10 p-4 rounded-2xl mb-6 ring-1 ring-destructive/20 shadow-lg shadow-destructive/5"
+      >
         <AlertCircle class="h-10 w-10 text-destructive" />
       </div>
       <h2 class="text-xl font-bold mb-2">Oops! Something went wrong</h2>
@@ -174,15 +183,18 @@
         maxSize={35}
         class="bg-sidebar/30 border-r border-border hidden md:block"
       >
-      {#if refetchTimer && countdown > 0}
-        <span class="text-xs text-muted-foreground ml-2">
-          Refetching in {(countdown).toFixed(1)}s
-        </span>
-      {/if}
+        {#if refetchTimer && countdown > 0}
+          <span class="text-xs text-muted-foreground ml-2">
+            Refetching in {countdown.toFixed(1)}s
+          </span>
+        {/if}
         <SessionSidebar {session} />
       </ResizablePane>
 
-      <ResizableHandle withHandle class="w-1 bg-border/50 hover:bg-primary/30 transition-colors" />
+      <ResizableHandle
+        withHandle
+        class="w-1 bg-border/50 hover:bg-primary/30 transition-colors"
+      />
 
       <ResizablePane defaultSize={78} minSize={40}>
         <div class="flex flex-col h-full bg-background/40">
