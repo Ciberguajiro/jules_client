@@ -2054,9 +2054,10 @@ dependencies = [
 
 [[package]]
 name = "jules-client"
-version = "0.1.2"
+version = "0.2.0"
 dependencies = [
  "once_cell",
+ "regex",
  "reqwest 0.12.28",
  "serde",
  "serde_json",

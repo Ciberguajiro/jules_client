@@ -1,6 +1,6 @@
 {
   "name": "jules-client",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "A modern desktop client for the Jules API",
   "author": "ciberguajiro",
   "repository": {
@@ -11,11 +11,14 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
+    "build:prod": "NODE_ENV=production vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "tauri": "tauri",
-    "tauri:dev": "tauri dev"
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "tauri:build:prod": "NODE_ENV=production tauri build"
   },
   "license": "MIT",
   "dependencies": {

@@ -54,7 +54,7 @@ pub fn run() {
             get_session_by_id,
             delete_session,
             post_session,
-            post_session_send_message,
+            send_message,
             post_session_approve_plan,
             get_session_activities,
             set_api_key,

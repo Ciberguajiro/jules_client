@@ -1,12 +1,12 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "jules-client",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "identifier": "com.ciberguajiro.jules-client",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1422",
-    "beforeBuildCommand": "bun run build",
+    "beforeBuildCommand": "bun run build:prod",
     "frontendDist": "../build"
   },
   "app": {
@@ -15,11 +15,11 @@
         "title": "jules-client",
         "width": 800,
         "height": 600,
-        "devtools": false
+        "devtools": true
       }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' asset: https://*; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://jules.googleapis.com;"
+      "csp": "default-src 'self'; img-src 'self' asset: https://*; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://jules.googleapis.com; font-src 'self' data:;"
     }
   },
   "bundle": {
@@ -32,7 +32,21 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "category": "DeveloperTool",
+    "shortDescription": "A modern desktop client for the Jules API",
+    "longDescription": "Jules Client is a modern desktop application that provides a clean and efficient interface for interacting with the Jules API, making it easy to manage AI coding sessions.",
+    "externalBin": [],
+    "copyright": "",
+    "license": "MIT",
+    "licenseFile": "../LICENSE",
+    "macOS": {
+      "entitlements": null,
+      "exceptionDomain": "",
+      "frameworks": [],
+      "providerShortName": null,
+      "signingIdentity": null
+    }
   },
   "plugins": {
     "updater": {

@@ -2,7 +2,7 @@ pub mod models;
 
 use once_cell::sync::Lazy;
 use reqwest::Client;
-static BASE_URL: &str = "https://jules.googleapis.com/v1alpha";
+use crate::commands::get_api_base_url;
 
 pub static HTTP_CLIENT: Lazy<Client> = Lazy::new(|| {
     Client::builder()
@@ -13,5 +13,9 @@ pub static HTTP_CLIENT: Lazy<Client> = Lazy::new(|| {
 });
 
 pub fn url(path: &str) -> String {
-    format!("{BASE_URL}{path}")
+    let base = get_api_base_url();
+    // Ensure the base URL doesn't end with a slash and the path starts with a slash
+    let base = base.trim_end_matches('/');
+    let path = if path.starts_with('/') { path } else { &format!("/{path}") };
+    format!("{}{}{}", base, path, if path == "/" || path.ends_with('/') { "" } else { "" })
 }

@@ -4,9 +4,11 @@
     Loader,
     AlertCircle,
     Github,
+    Plus,
     History,
   } from "lucide-svelte";
   import { Input } from "@/lib/components/ui/input";
+  import { Button } from "@/lib/components/ui/button";
 
   import StatusConfig from "@/components/status_config.svelte";
   import type { Session, Source } from "@/types";
@@ -14,7 +16,20 @@
   import { onMount, onDestroy } from "svelte";
   import { fade, slide } from "svelte/transition";
   import { Skeleton } from "@/lib/components/ui/skeleton";
+  import { validateSearchText } from "@/lib/validation";
+  import { ErrorHandler, withErrorHandling } from "@/lib/error-handler";
+  import { log } from "@/lib/logger";
   import NewSession from "@/components/new_session.svelte";
+
+  let NewSessionComponent: any = null;
+
+  async function loadNewSessionComponent() {
+    if (!NewSessionComponent) {
+      const module = await import("@/components/new_session.svelte");
+      NewSessionComponent = module.default;
+    }
+    return NewSessionComponent;
+  }
 
   let sessions = $state<Session[]>([]);
   let sources = $state<Source[]>([]);
@@ -23,35 +38,83 @@
   let filter = $state("");
   let refetchTimer: number | null = $state(null);
   let countdown: number = $state(0);
+  let searchError = $state<string | null>(null);
+
+  function validateSearch() {
+    const validation = validateSearchText(filter);
+    if (!validation.valid) {
+      searchError = validation.error!;
+      return false;
+    }
+    searchError = null;
+    return true;
+  }
+
+  function handleSearchInput() {
+    log.userAction('search_input', { searchTerm: filter });
+    validateSearch();
+  }
 
 
 
   async function fetchSessions() {
-    try {
+    const startTime = Date.now();
+    
+    const safeFetch = withErrorHandling(async () => {
       loading = true;
       error = null;
+      log.apiCall('GET', '/sessions');
+      
       const data = await invoke<any>("get_sessions");
       sessions = Array.isArray(data) ? data : (data.sessions || []);
-    } catch (err) {
-      console.error("Error fetching sessions:", err);
-      error = "Failed to load sessions. " + err;
-    } finally {
-      loading = false;
-    }
+      
+      const duration = Date.now() - startTime;
+      log.apiResponse('GET', '/sessions', 200, duration);
+      log.info(`Fetched ${sessions.length} sessions`, { sessionCount: sessions.length });
+    }, (appError) => {
+      const duration = Date.now() - startTime;
+      log.apiResponse('GET', '/sessions', 0, duration);
+      log.error('Failed to fetch sessions', appError.originalError, { duration });
+      error = ErrorHandler.getUserMessage(appError);
+    });
+
+    await safeFetch();
+    loading = false;
   }
 
   async function fetchSources() {
-    try {
+    const startTime = Date.now();
+    
+    const safeFetch = withErrorHandling(async () => {
+      log.apiCall('GET', '/sources');
+      
       const data = await invoke<any>("get_sources");
       sources = Array.isArray(data) ? data : (data.sources || []);
-    } catch (err) {
-      console.error("Error fetching sources:", err);
-    }
+      
+      const duration = Date.now() - startTime;
+      log.apiResponse('GET', '/sources', 200, duration);
+      log.info(`Fetched ${sources.length} sources`, { sourceCount: sources.length });
+    }, (appError) => {
+      const duration = Date.now() - startTime;
+      log.apiResponse('GET', '/sources', 0, duration);
+      log.error('Failed to fetch sources', appError.originalError, { duration });
+    });
+
+    await safeFetch();
   }
 
-  onMount(() => {
-    fetchSessions();
-    fetchSources();
+  onMount(async () => {
+    log.performance('page_mount_start', 0);
+    
+    // Start parallel data fetching
+    const fetchPromises = [fetchSessions(), fetchSources()];
+    
+    // Prefetch commonly used components
+    loadNewSessionComponent();
+    
+    await Promise.all(fetchPromises);
+    
+    log.performance('page_mount_complete', Date.now() - performance.now());
   });
 
   onDestroy(() => {
@@ -86,7 +149,7 @@
 
 
   const filteredSessions = $derived(
-    sessions.filter(
+    searchError ? [] : sessions.filter(
       (s) =>
         s.name.toLowerCase().includes(filter.toLowerCase()) ||
         s.sourceContext?.source?.toLowerCase().includes(filter.toLowerCase()),
@@ -122,8 +185,15 @@
         <Input
           placeholder="Search sessions..."
           bind:value={filter}
-          class="pl-9 bg-card shadow-sm border-border/50 transition-all focus:border-primary/50"
+          class="pl-9 bg-card shadow-sm border-border/50 transition-all focus:border-primary/50 {searchError ? 'border-destructive' : ''}"
+          oninput={handleSearchInput}
         />
+        {#if searchError}
+          <p class="text-sm text-destructive mt-1 flex items-center gap-1">
+            <AlertCircle class="w-3 h-3" />
+            {searchError}
+          </p>
+        {/if}
       </div>
 
       {#if error}
