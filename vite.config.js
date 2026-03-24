@@ -52,9 +52,8 @@ export default defineConfig(async ({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks: {
-            vendor: ['@tauri-apps/api', 'lucide-svelte'],
+            vendor: ['lucide-svelte'],
             ui: ['@/lib/components/ui/button', '@/lib/components/ui/dialog', '@/lib/components/ui/input'],
-            utils: ['marked', 'clsx', 'tailwind-merge'],
           },
           // Optimize chunk naming for better caching
           chunkFileNames: (chunkInfo) => {
@@ -77,7 +76,7 @@ export default defineConfig(async ({ mode }) => {
           },
         },
         // External dependencies that should not be bundled
-        external: [],
+        external: ['@tauri-apps/api', 'marked', 'clsx', 'tailwind-merge'],
       },
       // Optimize terser options
       terserOptions: {

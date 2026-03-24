@@ -29,7 +29,8 @@
     "@tauri-apps/plugin-updater": "^2.10.0",
     "lucide-svelte": "^0.577.0",
     "marked": "^17.0.4",
-    "tailwindcss": "^4.2.1"
+    "tailwindcss": "^4.2.1",
+    "terser": "^5.46.1"
   },
   "devDependencies": {
     "@internationalized/date": "^3.10.0",
